@@ -66,10 +66,10 @@ def pretty_maze(maze):
 class DateSolver(commands.Cog):
 
     def __init__(self, bot):
-        template_path = f"{bot.PATH}\\templates"
+        template_path = f"{bot.PATH}/templates"
         self.bot = bot
         self.templates = {
-            f.split('.')[0]: cv2.imread(f'{template_path}\\{f}') for f in os.listdir(template_path)
+            f.split('.')[0]: cv2.imread(f'{template_path}/{f}') for f in os.listdir(template_path)
         }
 
     def match_template(self, image):
