@@ -62,7 +62,6 @@ def pretty_maze(maze):
         print(frmt.format(*l), '\n')
 
 
-
 class DateSolver(commands.Cog):
 
     def __init__(self, bot):
@@ -98,7 +97,7 @@ class DateSolver(commands.Cog):
                 (147, 505, 117)]
 
         x_checks = [
-            [(250, 200), (317, 200), (379, 200), (441, 200), (508, 200)],
+            [(250, 200), (314, 200), (379, 200), (441, 200), (508, 200)],
             [(236, 235), (309, 235), (378, 235), (447, 235), (516, 235)],
             [(228, 278), (303, 278), (378, 278), (453, 278), (528, 278)],
             [(199, 330), (285, 330), (371, 330), (457, 330), (543, 330)],
@@ -142,22 +141,23 @@ class DateSolver(commands.Cog):
     def game(self, image):
         maze, base_ori = self.make_map(image)
         best, rpath = -1, None
-        count = 2000000
 
         def solve(x, y, ori, gas=100, food=50, drink=50, mood=75, path=[], shopping=False, total=0, bl=dict()):
-            nonlocal maze, best, rpath, count
+            global places, moveset, interaction_set
+            nonlocal best, rpath
 
-            if any(stat <= 0 for stat in (food, mood, gas, drink)) or not count:
-
-                return
+            for stat in (food, mood, gas, drink):
+                if stat <= 0:
+                    return
 
             if total == 25:
-                count -= 1
-                ap = math.ceil((food + drink + mood + 18) / 6) + shopping * 30
+
+                ap = math.ceil((food + drink + mood) / 6) + shopping * 30
 
                 if ap > best:
                     best = ap
                     rpath = path
+
                 return
 
             interactions = [
@@ -173,18 +173,23 @@ class DateSolver(commands.Cog):
             for iy, ix in interactions:
 
                 interaction = maze[iy][ix]
-                if interaction not in places or bl.get((iy, ix), 0) > total - 1:
+                if interaction not in places or bl.get((iy, ix), -2) > total - 1:
                     continue
 
-                new_bl = {**bl, (iy, ix): total + 10}
-
+                new_bl = {}
+                for k, v in bl.items():
+                    new_bl[k] = v
                 if interaction == 'shopping':
-                    solve(x, y, ori, gas=gas, food=food - 4, drink=drink - 6, mood=mood - 8, path=path + ["SHOPPING BAG"],
-                            shopping=True, total=total + 1, bl={**bl, (iy, ix): total + 100})
+                    new_bl[(iy, ix)] = total+100
+                    solve(x, y, ori, gas=gas, food=food - 4, drink=drink - 6, mood=mood - 8, path=path + [interaction.upper()],
+                        shopping=True, total=total + 1, bl=new_bl)
 
-                if interaction == 'flower':
-                    solve(x, y, ori, gas=gas, food=food - 4, drink=drink - 6, mood=mood - 8, path=path + ["FLOWER"],
-                            shopping=shopping, total=total + 1, bl={**bl, (iy, ix): total + 100})
+                elif interaction == 'flower':
+                    new_bl[(iy, ix)] = total+100
+                    g, d, f, m = [min(100, v + places[interaction].get(k, 0)) for k, v in (('gas', gas), ('drink', drink), ('food', food), ('mood', mood))]
+
+                    solve(x, y, ori, gas=g, food=f - 4, drink=d - 6, mood=m - 8, path=path + [interaction.upper()],
+                        shopping=shopping, total=total + 1, bl=new_bl)
 
                 elif interaction == 'home':
 
@@ -196,19 +201,20 @@ class DateSolver(commands.Cog):
 
                 else:
                     g, f, m, d = self.apply_int(interaction, gas=gas, food=food, mood=mood, drink=drink)
-
+                    new_bl[(iy, ix)] = total+10
                     solve(x, y, ori, gas=g, food=f - 4, drink=d - 6, mood=m - 8, path=path + [interaction.upper()],
-                            shopping=shopping, total=total + 1, bl=new_bl)
+                        shopping=shopping, total=total + 1, bl=new_bl)
 
             for my, mx, mori in moves:
                 solve(mx, my, mori, gas=gas - 10, food=food - 4, drink=drink - 6, mood=mood - 8, path=path + [mori],
-                        shopping=shopping, total=total + 1, bl=bl)
+                    shopping=shopping, total=total + 1, bl=bl)
 
         solve(5, 14, base_ori)
 
         return best, rpath
 
     @commands.command(name='solveurl')
+    @commands.is_owner()
     async def _solveurl(self, ctx, *, url: str):
         image = await self.fetch_image(url)
         partial = functools.partial(self.game, image)
