@@ -1,5 +1,5 @@
 import asyncio
-import math
+
 import os
 from copy import deepcopy
 import discord
