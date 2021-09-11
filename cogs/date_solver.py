@@ -10,7 +10,7 @@ import aiohttp
 import functools
 from discord.ext.commands.cooldowns import BucketType
 
-from .datesolver import game
+from .ext.datesolver import game
 
 default_maze = [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
                 [1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1],

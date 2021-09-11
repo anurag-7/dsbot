@@ -2,6 +2,15 @@ from discord.ext import commands
 import discord
 import logging
 import os
+import asyncio
+
+try:
+    import uvloop
+    asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
+
+except ModuleNotFoundError:
+    pass
+
 
 frmt = '[%(asctime)-15s] [%(levelname)s] %(message)s'
 log = logging.getLogger('discord')
