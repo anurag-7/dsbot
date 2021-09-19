@@ -9,6 +9,7 @@ from discord.ext import commands
 import aiohttp
 import functools
 from discord.ext.commands.cooldowns import BucketType
+import contextlib
 
 from .ext.datesolver import game
 
@@ -62,7 +63,7 @@ translate = {
     50: "RESTAURANT",
     55: "NIGHTCLUB",
     60: "FAIR",
-    65: "SANDWHICH",
+    65: "SANDWICH",
 
     105: "HOME",
     110: "SHOPPING",
@@ -185,10 +186,14 @@ class DateSolver(commands.Cog):
                     ring = False
 
                 embed.description = "Solving.."
-                await m.clear_reactions()
+
                 await m.edit(embed=embed)
+
             except asyncio.TimeoutError:
                 return
+            finally:
+                with contextlib.suppress(discord.HTTPException, discord.Forbidden):
+                    await m.clear_reactions()
         else:
             embed.description = "Solving.."
             m = await ctx.reply(embed=embed)
@@ -239,10 +244,12 @@ class DateSolver(commands.Cog):
                     ring = False
 
                 embed.description = "Solving.."
-                await m.clear_reactions()
                 await m.edit(embed=embed)
             except asyncio.TimeoutError:
                 return
+            finally:
+                with contextlib.suppress(discord.HTTPException, discord.Forbidden):
+                    await m.clear_reactions()
         else:
             embed.description = "Solving.."
             m = await ctx.reply(embed=embed)
