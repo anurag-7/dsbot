@@ -269,7 +269,7 @@ class DateSolver(commands.Cog):
             await ctx.send(f"{ctx.author.mention}, an instance of this command is already running.")
 
     @commands.command(name='help')
-    async def _help(ctx):
+    async def _help(self, ctx):
 
         embed = discord.Embed(title='**__Help__**', color=0x36393f)
 
