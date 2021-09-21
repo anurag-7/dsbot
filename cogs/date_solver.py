@@ -268,5 +268,26 @@ class DateSolver(commands.Cog):
         if isinstance(error, commands.MaxConcurrencyReached):
             await ctx.send(f"{ctx.author.mention}, an instance of this command is already running.")
 
+    @commands.command(name='help')
+    async def _help(ctx):
+
+        embed = discord.Embed(title='**__Help__**', color=0x36393f)
+
+        content_a = r"""> \✔️ Best AR / AP Path.
+        > \✔️ Option to take the Ring path (or go for just AP).
+        """
+        content_b = r"""> \❌ Trying to solve maps after moving.
+        > \❌ Trying to get a better path by running the command again.
+        > \❌ Trying to solve another person's map using an image.
+        """
+        content_c = r"""> \❕ Bot is not public / invite-able currently (if ever).
+        > \❕ Bot is free to use as of now.
+        """
+        embed.add_field(name=r"\🔹 What works", value=content_a, inline=False)
+        embed.add_field(name=r"\🔸 What doesn't work", value=content_b, inline=False)
+        embed.add_field(name=r"\📙 Additionally", value=content_c, inline=False)
+
+        await ctx.send(embed=embed)
+
 def setup(bot):
     bot.add_cog(DateSolver(bot))
