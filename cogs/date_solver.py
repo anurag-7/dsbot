@@ -282,6 +282,7 @@ class DateSolver(commands.Cog):
         """
         content_c = r"""> \❕ Bot is not public / invite-able currently (if ever).
         > \❕ Bot is free to use as of now.
+        > \❕ To use it, simply do `a!solve` followed by `k!vi` with **date map** open.
         """
         embed.add_field(name=r"\🔹 What works", value=content_a, inline=False)
         embed.add_field(name=r"\🔸 What doesn't work", value=content_b, inline=False)
