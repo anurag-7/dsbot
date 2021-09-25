@@ -87,6 +87,7 @@ def pretty_maze(maze):
 def get_stats(image):
     cropped = image[0: 145, 715: 770]
     string = pytesseract.image_to_string(cropped, config="-c tessedit_char_whitelist=1234567890 --psm 11")
+    print(string)
     stats = [int(i) for i in re.findall(r"\d{1,3}", string, re.MULTILINE)]
     total = (100 - stats.pop()) // 4
     return stats, total
