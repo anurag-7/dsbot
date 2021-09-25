@@ -1,15 +1,17 @@
 import asyncio
-
-import os
-from copy import deepcopy
-import discord
-import cv2
-import numpy as np
-from discord.ext import commands
-import aiohttp
-import functools
-from discord.ext.commands.cooldowns import BucketType
 import contextlib
+import functools
+import os
+import re
+from copy import deepcopy
+
+import aiohttp
+import cv2
+import discord
+import numpy as np
+import pytesseract
+from discord.ext import commands
+from discord.ext.commands.cooldowns import BucketType
 
 from .ext.datesolver import game
 
@@ -82,6 +84,12 @@ def pretty_maze(maze):
     for l in maze:
         print(frmt.format(*l), '\n')
 
+def get_stats(image):
+    cropped = image[0: 145, 715: 770]
+    string = pytesseract.image_to_string(cropped, config="-c tessedit_char_whitelist=1234567890 --oem 0 --psm 11")
+    stats = [int(i) for i in re.findall(r"\d{1,3}", string, re.MULTILINE)]
+    total = (100 - stats.pop()) // 4
+    return stats, total
 
 class DateSolver(commands.Cog):
 
@@ -156,9 +164,8 @@ class DateSolver(commands.Cog):
                 image = cv2.imdecode(b, cv2.IMREAD_COLOR)
                 return image
 
-    def game_setup(self, maze, base_ori, ring):
-
-        best, rpath = game(maze, base_ori, ring)
+    def game_setup(self, maze, base_ori, stats, total, ring):
+        best, rpath = game(maze, base_ori, stats, total, ring)
         strpath = [translate[k] for k in rpath]
         return best, strpath
 
@@ -199,13 +206,17 @@ class DateSolver(commands.Cog):
             m = await ctx.reply(embed=embed)
             ring = False
 
-        partial = functools.partial(self.game_setup, maze, base_ori, ring)
+        stats, total = get_stats(image)
+        partial = functools.partial(self.game_setup, maze, base_ori, stats, total, ring)
         affection, solution = await self.bot.loop.run_in_executor(None, partial)
 
         if solution:
             await m.edit(content=f"`{affection} AP` | `{', '.join(solution)}`", embed=None)
         else:
-            await m.edit(content="No Solution Found :(", embed=None)
+            if ring:
+                await m.edit(content="No Solution with Ring Found :(", embed=None)
+            else:
+                await m.edit(content="No Solution Found, you may wanna use the Airport and try again.", embed=None)
 
     @commands.command(name='solve')
     @commands.max_concurrency(1, per=BucketType.user, wait=False)
@@ -255,13 +266,17 @@ class DateSolver(commands.Cog):
             m = await ctx.reply(embed=embed)
             ring = False
 
-        partial = functools.partial(self.game_setup, maze, base_ori, ring)
+        stats, total = get_stats(image)
+        partial = functools.partial(self.game_setup, maze, base_ori, stats, total, ring)
         affection, solution = await self.bot.loop.run_in_executor(None, partial)
 
         if solution:
             await m.edit(content=f"`{affection} AP` | `{', '.join(solution)}`", embed=None)
         else:
-            await m.edit(content="No Solution Found :(", embed=None)
+            if ring:
+                await m.edit(content="No Solution with Ring Found :(", embed=None)
+            else:
+                await m.edit(content="No Solution Found, you may wanna use the Airport and try again.", embed=None)
 
     @_solve.error
     async def solve_error(self, ctx, error):
@@ -275,8 +290,9 @@ class DateSolver(commands.Cog):
 
         content_a = r"""> \✔️ Best AR / AP Path.
         > \✔️ Option to take the Ring path (or go for just AP).
+        > \✔️ Solving after selecting Airport.
         """
-        content_b = r"""> \❌ Trying to solve maps after moving.
+        content_b = r"""> \❌ Trying to solve maps when the car isn't at starting position.
         > \❌ Trying to get a better path by running the command again.
         > \❌ Trying to solve another person's map using an image.
         """
