@@ -255,7 +255,7 @@ class DateSolver(commands.Cog):
         if solution:
             cursor = await self.bot.DB.execute("SELECT emoji FROM users WHERE user_id = ?", (ctx.author.id,))
             val = (await cursor.fetchone())[0]
-            if val:
+            if val and val[0]:
                 path = ' '.join(EMOJIS[x] for x in solution if x != -1)
             else:
                 path = f"`{', '.join(translate[x] for x in solution if x != -1)}`"
@@ -338,8 +338,8 @@ class DateSolver(commands.Cog):
 
         if solution:
             cursor = await self.bot.DB.execute("SELECT emoji FROM users WHERE user_id = ?", (ctx.author.id,))
-            val = (await cursor.fetchone())[0]
-            if val:
+            val = (await cursor.fetchone())
+            if val and val[0]:
                 path = ' '.join(EMOJIS[x] for x in solution if x != -1)
             else:
                 path = ', '.join(translate[x] for x in solution if x != -1)
