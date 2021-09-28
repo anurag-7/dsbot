@@ -24,7 +24,6 @@ intents.emojis = True
 bot = commands.Bot(command_prefix='a!', intents=intents, help_command=None)
 bot.PATH = os.path.dirname(os.path.abspath(__file__))
 
-
 @bot.event
 async def on_ready():
     log.log(20, " READY ")
