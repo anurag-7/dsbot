@@ -291,7 +291,6 @@ class DateSolver(commands.Cog):
 
         content_a = r"""> \✔️ Best AR / AP Path.
         > \✔️ Option to take the Ring path (or go for just AP).
-        > \✔️ Solving after selecting Airport.
         """
         content_b = r"""> \❌ Trying to solve maps when the car isn't at starting position.
         > \❌ Trying to get a better path by running the command again.
