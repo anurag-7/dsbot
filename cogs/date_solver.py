@@ -85,9 +85,9 @@ def pretty_maze(maze):
         print(frmt.format(*l), '\n')
 
 def get_stats(image):
+
     cropped = image[0: 145, 715: 770]
     string = pytesseract.image_to_string(cropped, config="-c tessedit_char_whitelist=1234567890 --psm 11")
-    print(string)
     stats = [int(i) for i in re.findall(r"\d{1,3}", string, re.MULTILINE)]
     total = (100 - stats.pop()) // 4
     return stats, total
@@ -155,7 +155,7 @@ class DateSolver(commands.Cog):
                 ring = True if r else ring
                 x += diff
 
-        ori = 'LEFT' if sum(image[573, 389]) == 523 else 'RIGHT'
+        ori = 2 if sum(image[573, 389]) == 523 else 3
         return maze, ori, ring
 
     async def fetch_image(self, url):
@@ -167,7 +167,7 @@ class DateSolver(commands.Cog):
 
     def game_setup(self, maze, base_ori, stats, total, ring):
         best, rpath = game(maze, base_ori, stats, total, ring)
-        strpath = [translate[k] for k in rpath]
+        strpath = [translate[k] for k in rpath if k != -1]
         return best, strpath
 
     @commands.command(name='solveurl')
@@ -207,7 +207,7 @@ class DateSolver(commands.Cog):
             m = await ctx.reply(embed=embed)
             ring = False
 
-        stats, total = get_stats(image)
+        stats, total = [100, 50, 50, 75], 0
         partial = functools.partial(self.game_setup, maze, base_ori, stats, total, ring)
         affection, solution = await self.bot.loop.run_in_executor(None, partial)
 
@@ -250,7 +250,7 @@ class DateSolver(commands.Cog):
             await m.add_reaction('❌')
 
             try:
-                reaction, user = await ctx.bot.wait_for('reaction_add', timeout=20, check=pred)
+                reaction, _ = await ctx.bot.wait_for('reaction_add', timeout=20, check=pred)
 
                 if str(reaction.emoji) == '❌':
                     ring = False
@@ -267,7 +267,7 @@ class DateSolver(commands.Cog):
             m = await ctx.reply(embed=embed)
             ring = False
 
-        stats, total = get_stats(image)
+        stats, total = [100, 50, 50, 75], 0
         partial = functools.partial(self.game_setup, maze, base_ori, stats, total, ring)
         affection, solution = await self.bot.loop.run_in_executor(None, partial)
 

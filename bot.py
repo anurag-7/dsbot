@@ -37,4 +37,4 @@ cogs = (
 for cog in cogs:
     bot.load_extension(cog)
 
-bot.run("NzMzNTQ1NTUwODI1MzkwMTUw.XxEthw.kSmZGtDXBuaQyykSVxlv-xyNuBI")
+bot.run("ODgzNjkxNDE3MDQwNDcwMDI3.YTNnxA.8Rvv1oPfU4_Cgq8Zq3VivhfI5wY")
