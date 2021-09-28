@@ -217,7 +217,7 @@ class DateSolver(commands.Cog):
             if ring:
                 await m.edit(content="No Solution with Ring Found :(", embed=None)
             else:
-                await m.edit(content="No Solution Found, you may wanna use the Airport and try again.", embed=None)
+                await m.edit(content="No Solution Found :(", embed=None)
 
     @commands.command(name='solve')
     @commands.max_concurrency(1, per=BucketType.user, wait=False)
@@ -277,12 +277,12 @@ class DateSolver(commands.Cog):
             if ring:
                 await m.edit(content="No Solution with Ring Found :(", embed=None)
             else:
-                await m.edit(content="No Solution Found, you may wanna use the Airport and try again.", embed=None)
+                await m.edit(content="No Solution Found :(", embed=None)
 
     @_solve.error
     async def solve_error(self, ctx, error):
         if isinstance(error, commands.MaxConcurrencyReached):
-            await ctx.send(f"{ctx.author.mention}, an instance of this command is already running.")
+            await ctx.send(f"{ctx.author.mention}, a previous command is waiting for `k!vi`.")
 
     @commands.command(name='help')
     async def _help(self, ctx):
