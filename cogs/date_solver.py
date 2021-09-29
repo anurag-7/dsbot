@@ -110,9 +110,12 @@ def pretty_maze(maze):
 
 def get_stats(image):
 
-    cropped = image[0: 145, 715: 770]
-    string = pytesseract.image_to_string(cropped, config="-c tessedit_char_whitelist=1234567890 --psm 11")
-    stats = [int(i) for i in re.findall(r"\d{1,3}", string, re.MULTILINE)]
+    stats = []
+    for i in range(0, 150, 30):
+        cropped = image[i: i + 28, 715: 765]
+        string = pytesseract.image_to_string(cropped, config= "-c tessedit_char_whitelist=1234567890 --oem 0 --psm 7")
+        stats.append(int(string))
+
     total = (100 - stats.pop()) // 4
     return stats, total
 
@@ -248,7 +251,8 @@ class DateSolver(commands.Cog):
             m = await ctx.reply(embed=embed)
             ring = False
 
-        stats, total = [100, 50, 50, 75], 0
+        stats, total = get_stats(image)
+        print(stats, total)
         partial = functools.partial(self.game_setup, maze, base_ori, stats, total, ring)
         affection, solution = await self.bot.loop.run_in_executor(None, partial)
 
@@ -266,7 +270,7 @@ class DateSolver(commands.Cog):
             if ring:
                 await m.edit(content="No Solution with Ring Found :(", embed=None)
             else:
-                await m.edit(content="No Solution Found :(", embed=None)
+                await m.edit(content="No Solution Found, try going to the Airport and solving again.", embed=None)
 
     @commands.command(name='emoji')
     async def _emoji(self, ctx):
@@ -332,7 +336,7 @@ class DateSolver(commands.Cog):
             m = await ctx.reply(embed=embed)
             ring = False
 
-        stats, total = [100, 50, 50, 75], 0
+        stats, total = get_stats(image)
         partial = functools.partial(self.game_setup, maze, base_ori, stats, total, ring)
         affection, solution = await self.bot.loop.run_in_executor(None, partial)
 
@@ -349,8 +353,7 @@ class DateSolver(commands.Cog):
             if ring:
                 await m.edit(content="No Solution with Ring Found :(", embed=None)
             else:
-                await m.edit(content="No Solution Found :(", embed=None)
-
+                await m.edit(content="No Solution Found, try going to the Airport and solving again.", embed=None)
 
     @_solve.error
     async def solve_error(self, ctx, error):
@@ -364,8 +367,9 @@ class DateSolver(commands.Cog):
 
         content_a = r"""> \✔️ Best AR / AP Path.
         > \✔️ Option to take the Ring path (or go for just AP).
+        > \✔️ Solving maps after using the Airport.
         """
-        content_b = r"""> \❌ Trying to solve maps when the car isn't at starting position.
+        content_b = r"""> \❌ Trying to solve maps where the car isn't at starting position.
         > \❌ Trying to get a better path by running the command again.
         > \❌ Trying to solve another person's map using an image.
         """
