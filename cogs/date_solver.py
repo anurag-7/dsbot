@@ -252,7 +252,7 @@ class DateSolver(commands.Cog):
         partial = functools.partial(self.game_setup, maze, base_ori, stats, total, ring)
         affection, solution = await self.bot.loop.run_in_executor(None, partial)
 
-        if solution:
+        if affection != -1:
             cursor = await self.bot.DB.execute("SELECT emoji FROM users WHERE user_id = ?", (ctx.author.id,))
             val = await cursor.fetchone()
             if val and val[0]:
@@ -336,7 +336,7 @@ class DateSolver(commands.Cog):
         partial = functools.partial(self.game_setup, maze, base_ori, stats, total, ring)
         affection, solution = await self.bot.loop.run_in_executor(None, partial)
 
-        if solution:
+        if affection != -1:
             cursor = await self.bot.DB.execute("SELECT emoji FROM users WHERE user_id = ?", (ctx.author.id,))
             val = (await cursor.fetchone())
             if val and val[0]:
