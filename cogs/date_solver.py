@@ -268,7 +268,7 @@ class DateSolver(commands.Cog):
             m = await ctx.reply(embed=embed)
             ring = False
 
-        stats, total = get_stats(image)
+        stats, total = self.get_stats(image)
         print(stats, total)
         partial = functools.partial(self.game_setup, maze, base_ori, stats, total, ring)
         affection, solution = await self.bot.loop.run_in_executor(None, partial)
@@ -353,7 +353,7 @@ class DateSolver(commands.Cog):
             m = await ctx.reply(embed=embed)
             ring = False
 
-        stats, total = get_stats(image)
+        stats, total = self.get_stats(image)
         partial = functools.partial(self.game_setup, maze, base_ori, stats, total, ring)
         affection, solution = await self.bot.loop.run_in_executor(None, partial)
 
