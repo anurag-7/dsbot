@@ -1,3 +1,4 @@
+
 import asyncio
 import contextlib
 import functools
@@ -10,10 +11,9 @@ import aiosqlite
 import cv2
 import discord
 import numpy as np
-import pytesseract
 from discord.ext import commands
 from discord.ext.commands.cooldowns import BucketType
-
+from tesserocr import PyTessBaseAPI, PSM, OEM
 from .ext.datesolver import game
 
 default_maze = [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
@@ -108,22 +108,27 @@ def pretty_maze(maze):
     for l in maze:
         print(frmt.format(*l), '\n')
 
-def get_stats(image):
+def GetCVImage(image, color='BGR'):
+        bytes_per_pixel = image.shape[2] if len(image.shape) == 3 else 1
+        height, width   = image.shape[:2]
+        bytes_per_line  = bytes_per_pixel * width
 
-    stats = []
-    for i in range(0, 150, 30):
-        cropped = image[i: i + 28, 715: 765]
-        string = pytesseract.image_to_string(cropped, config= "-c tessedit_char_whitelist=1234567890 --oem 0 --psm 7")
-        stats.append(int(string))
+        if bytes_per_pixel != 1 and color != 'RGB':
+            image = cv2.cvtColor(image, getattr(cv2, f'COLOR_{color}2RGB'))
+        elif bytes_per_pixel == 1 and image.dtype == bool:
+            image = np.packbits(image, axis=1)
+            bytes_per_line  = image.shape[1]
+            width = bytes_per_line * 8
+            bytes_per_pixel = 0
 
-    total = (100 - stats.pop()) // 4
-    return stats, total
+        return (width, height, bytes_per_pixel, bytes_per_line)
 
 class DateSolver(commands.Cog):
 
     def __init__(self, bot):
         template_path = f"{bot.PATH}/templates"
         self.bot = bot
+        self.API = PyTessBaseAPI(psm=PSM.SINGLE_BLOCK, oem=OEM.TESSERACT_ONLY)
 
         task = self.bot.loop.create_task(self.db_open())
         self.bot.loop.run_until_complete(task)
@@ -143,9 +148,21 @@ class DateSolver(commands.Cog):
         await self.bot.DB.execute("PRAGMA read_uncommitted = true")
 
     def cog_unload(self):
-
+        self.API.End()
         task = self.bot.loop.create_task(self.db_close())
         self.bot.loop.run_until_complete(task)
+
+    def get_stats(self, image):
+
+        stats = []
+        self.API.SetImageBytes(image.tobytes(), *GetCVImage(image))
+        for i in range(0, 150, 30):
+                self.API.SetRectangle(715, i, 50, 28)
+                stats.append(int(self.API.GetUTF8Text()))
+
+        total = (100 - stats.pop()) // 4
+        self.API.Clear()
+        return stats, total
 
     def match_template(self, image):
 
