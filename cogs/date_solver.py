@@ -195,7 +195,7 @@ class DateSolver(commands.Cog):
 
         y_checks = [
             [(308, 175), (367, 175), (426, 175), (485, 175)],
-            [(297, 211), (363, 211), (429, 211), (495, 175)],
+            [(297, 211), (363, 211), (429, 211), (495, 211)],
             [(289, 247), (360, 247), (431, 247), (502, 247)],
             [(278, 286), (356, 286), (434, 286), (512, 286)],
             [(263, 348), (351, 348), (439, 348), (527, 348)],
@@ -269,7 +269,7 @@ class DateSolver(commands.Cog):
             ring = False
 
         stats, total = self.get_stats(image)
-        print(stats, total)
+
         partial = functools.partial(self.game_setup, maze, base_ori, stats, total, ring)
         affection, solution = await self.bot.loop.run_in_executor(None, partial)
 
