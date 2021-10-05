@@ -28,6 +28,15 @@ bot.PATH = os.path.dirname(os.path.abspath(__file__))
 async def on_ready():
     log.log(20, " READY ")
 
+@bot.event
+async def on_message(message):
+    if message.lower().beginswith(">gojobhai"):
+        embed = discord.Embed(color=0x36393f)
+        embed.set_image(url="https://cdn.discordapp.com/attachments/313405009536614402/894852023323881532/gojo-satoru-3-1.png")
+        await message.channel.send(embed=embed)
+
+    await bot.process_commands(message)
+
 cogs = (
     'jishaku',
     'cogs.date_solver'
