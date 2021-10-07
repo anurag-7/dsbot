@@ -16,12 +16,18 @@ frmt = '[%(asctime)-15s] [%(levelname)s] %(message)s'
 log = logging.getLogger('discord')
 logging.basicConfig(level=20, format=frmt, datefmt='%m/%d/%Y | %I:%M:%S')
 
+def get_prefix(bot, message):
+    if message.content.lower().startswith('a!'):
+        message_prefix = message.content[:3]
+        return message_prefix
+    else:
+        return 'a!'
 
 intents = discord.Intents.default()
 intents.webhooks = True
 intents.guild_reactions = True
 intents.emojis = True
-bot = commands.Bot(command_prefix='a!', intents=intents, help_command=None)
+bot = commands.Bot(command_prefix=get_prefix, intents=intents, help_command=None, case_insensitive=True)
 bot.PATH = os.path.dirname(os.path.abspath(__file__))
 
 @bot.event
