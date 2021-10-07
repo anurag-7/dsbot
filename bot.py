@@ -18,7 +18,7 @@ logging.basicConfig(level=20, format=frmt, datefmt='%m/%d/%Y | %I:%M:%S')
 
 def get_prefix(bot, message):
     if message.content.lower().startswith('a!'):
-        message_prefix = message.content[:3]
+        message_prefix = message.content[:2]
         return message_prefix
     else:
         return 'a!'
