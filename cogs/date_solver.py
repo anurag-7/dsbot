@@ -1,9 +1,11 @@
 
 import asyncio
+import collections
 import contextlib
+import dataclasses
 import functools
 import os
-import re
+import time
 from copy import deepcopy
 
 import aiohttp
@@ -13,8 +15,46 @@ import discord
 import numpy as np
 from discord.ext import commands
 from discord.ext.commands.cooldowns import BucketType
-from tesserocr import PyTessBaseAPI, PSM, OEM
+from tesserocr import OEM, PSM, PyTessBaseAPI
+
 from .ext.datesolver import game
+
+
+@dataclasses.dataclass(frozen=True, slots=True)
+class DateResult:
+    ap: int
+    user: int
+    time_taken: int
+    image_url: str
+
+    def __eq__(self, other) -> bool:
+        if other.__class__ is self.__class__:
+            return self.time_taken == other.time_taken
+        return False
+
+    def __lt__(self, other) -> bool:
+        if other.__class__ is self.__class__:
+            return self.time_taken < other.time_taken
+        return False
+
+    def __gt__(self, other) -> bool:
+        if other.__class__ is self.__class__:
+            return self.time_taken > other.time_taken
+        return False
+
+    def __le__(self, other) -> bool:
+        if other.__class__ is self.__class__:
+            return self.time_taken <= other.time_taken
+        return False
+
+    def __ge__(self, other) -> bool:
+        if other.__class__ is self.__class__:
+            return self.time_taken >= other.time_taken
+        return False
+
+    def __add__(self, other) -> int:
+        assert isinstance(other, self.__class__)
+        return self.time_taken + other.time_taken
 
 default_maze = [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
                 [1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1],
@@ -129,7 +169,7 @@ class DateSolver(commands.Cog):
         template_path = f"{bot.PATH}/templates"
         self.bot = bot
         self.API = PyTessBaseAPI(psm=PSM.SINGLE_BLOCK, oem=OEM.TESSERACT_ONLY)
-
+        self.perf_log = collections.deque([])
         task = self.bot.loop.create_task(self.db_open())
         self.bot.loop.run_until_complete(task)
 
@@ -355,7 +395,10 @@ class DateSolver(commands.Cog):
 
         stats, total = self.get_stats(image)
         partial = functools.partial(self.game_setup, maze, base_ori, stats, total, ring)
+        start = time.time()
         affection, solution = await self.bot.loop.run_in_executor(None, partial)
+        result = DateResult(affection, ctx.author.id, time.time() - start, url) # type: ignore
+        self.perf_log.appendleft(result)
 
         if affection != -1:
             cursor = await self.bot.DB.execute("SELECT emoji FROM users WHERE user_id = ?", (ctx.author.id,))
@@ -376,6 +419,47 @@ class DateSolver(commands.Cog):
     async def solve_error(self, ctx, error):
         if isinstance(error, commands.MaxConcurrencyReached):
             await ctx.send(f"{ctx.author.mention}, a previous command is waiting for `k!vi`.")
+
+    @commands.command(name='perflogs')
+    async def _perflogs(self, ctx, n: int = 100):
+
+        if not self.perf_log:
+            await ctx.send("Nothing to Show")
+            return
+
+        n = int(n)
+
+        if 0 >= n or n > 100:
+            n = 100
+
+        logs = list(self.perf_log)
+        recent = logs[:10]
+        logs.sort()
+
+
+        if n != 100:
+            partial = (len(self.perf_log) *  n/100)
+        else:
+            partial = len(self.perf_log)
+
+        worst = sum(logs[-partial:]) / partial
+        best = sum(logs[:partial]) / partial
+        average = sum(logs) / len(logs)
+
+        worst_str = f"{worst * 100}ms" if worst < 1 else f"{worst:.2f}s"
+        best_str = f"{best * 100}ms" if best < 1 else f"{best:.2f}s"
+        average_str = f"{average * 100}ms" if average < 1 else f"{average:.2f}s"
+
+        embed = discord.Embed(color=0x000000)
+        embed.title = "**__Performance Logs__**"
+        embed.description = f"**Best {n}%** : {best_str}\n**Average** : {average_str}\n**Worst {n}%** : {worst_str}"
+
+        fname = f"**Last {10 if len(logs) >= 10 else len(logs)} Entries:**"
+        fvalue = '\n'.join(f"{idx}." + "<@{0.user}> · {0.ap} AP · [Image]({0.image}) · {0.time_take:.2f}s\n".format(date)
+                           for idx, date in enumerate(recent, start=1))
+
+        embed.add_field(name=fname, value=fvalue, inline=False)
+        await ctx.send(embed=embed)
 
     @commands.command(name='help')
     async def _help(self, ctx):
