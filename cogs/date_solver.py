@@ -460,7 +460,7 @@ class DateSolver(commands.Cog):
         embed.description = f"**• Samples** : {len(logs)}\n" \
                             f"**• Best {n}%** : {get_smallest_unit(best)}\n" \
                             f"**• Average** : {get_smallest_unit(average)}\n" \
-                            f"**• Worst {n}%** : {get_smallest_unit(worst)}\n\n"
+                            f"**• Worst {n}%** : {get_smallest_unit(worst)}\n"
         embed.description += f"\n**• Last {10 if len(logs) >= 10 else len(logs)} Entries:**\n\n"
         embed.description += '\n'.join(f"{idx}.<@{d.user}> · {d.ap} AP · [Image]({d.image_url}) · {get_smallest_unit(d.time_taken)}\n"
                                        for idx, d in enumerate(recent, start=1))
