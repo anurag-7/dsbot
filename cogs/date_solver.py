@@ -53,8 +53,11 @@ class DateResult:
         return False
 
     def __add__(self, other) -> int:
-        assert isinstance(other, self.__class__)
-        return self.time_taken + other.time_taken
+        if isinstance(other, self.__class__):
+            return self.time_taken + other.time_taken
+        elif isinstance(other, int):
+            return self.time_taken + other
+        raise ValueError(f"{other} must be of Typer <int> or <{self.__class__}>")
 
 default_maze = [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
                 [1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1],
