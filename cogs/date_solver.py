@@ -433,7 +433,6 @@ class DateSolver(commands.Cog):
         recent = logs[:10]
         logs.sort()
 
-
         if n != 100:
             partial: int = int(len(self.perf_log) *  n/100)
         else:
@@ -451,11 +450,10 @@ class DateSolver(commands.Cog):
         embed.title = "**__Performance Log__**"
         embed.description = f"**Best {n}%** : {best_str}\n**Average** : {average_str}\n**Worst {n}%** : {worst_str}"
 
-        fname = f"**Last {10 if len(logs) >= 10 else len(logs)} Entries:**"
-        fvalue = '\n'.join(f"{idx}." + "<@{0.user}> · {0.ap} AP · [Image]({0.image_url}) · {0.time_taken:.3f}s\n".format(date)
+        embed.description += f"\n**Last {10 if len(logs) >= 10 else len(logs)} Entries:**\n"
+        embed.description += '\n'.join(f"{idx}." + "<@{0.user}> · {0.ap} AP · [Image]({0.image_url}) · {0.time_taken:.3f}s\n".format(date)
                            for idx, date in enumerate(recent, start=1))
 
-        embed.add_field(name=fname, value=fvalue, inline=False)
         await ctx.send(embed=embed)
 
     @commands.command(name='help')
