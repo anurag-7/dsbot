@@ -4,6 +4,7 @@ import collections
 import contextlib
 import dataclasses
 import functools
+import math
 import os
 import time
 from copy import deepcopy
@@ -144,6 +145,18 @@ def pretty_maze(maze):
     frmt = "{:>12}" * length
     for l in maze:
         print(frmt.format(*l), '\n')
+
+def get_smallest_unit(t: float) -> str:
+    units = [('s', 1), ('ms', 1000), ('µs', 1000000)]
+
+    for unit, mult in units:
+        num = mult * t
+        if num > 1:
+            if num.is_integer():
+                return f"{int(mult * t)} {unit}"
+            return f"{mult * t:.2f} {unit}"
+
+    return '1 µs'
 
 def GetCVImage(image, color='BGR'):
         bytes_per_pixel = image.shape[2] if len(image.shape) == 3 else 1
@@ -442,17 +455,15 @@ class DateSolver(commands.Cog):
         best = sum(l.time_taken for l in logs[:partial]) / partial
         average = sum(l.time_taken for l in logs) / len(logs)
 
-        worst_str = f"{int(worst * 1000)}ms" if worst < 1 else f"{worst:.2f}s"
-        best_str = f"{int(best * 1000)}ms" if best < 1 else f"{best:.2f}s"
-        average_str = f"{int(average * 1000)}ms" if average < 1 else f"{average:.2f}s"
-
         embed = discord.Embed(color=0x000000)
         embed.title = "**__Performance Log__**"
-        embed.description = f"**Best {n}%** : {best_str}\n**Average** : {average_str}\n**Worst {n}%** : {worst_str}"
+        embed.description = f"**Best {n}%** : {get_smallest_unit(best)}\n" \
+                            f"**Average** : {get_smallest_unit(average)}\n" \
+                            f"**Worst {n}%** : {get_smallest_unit(worst)}"
 
         embed.description += f"\n**Last {10 if len(logs) >= 10 else len(logs)} Entries:**\n"
-        embed.description += '\n'.join(f"{idx}." + "<@{0.user}> · {0.ap} AP · [Image]({0.image_url}) · {0.time_taken:.3f}s\n".format(date)
-                           for idx, date in enumerate(recent, start=1))
+        embed.description += '\n'.join(f"{idx}.<@{d.user}> · {d.ap} AP · [Image]({d.image_url}) · {get_smallest_unit(d.time_taken)}\n"
+                                       for idx, d in enumerate(recent, start=1))
 
         await ctx.send(embed=embed)
 
