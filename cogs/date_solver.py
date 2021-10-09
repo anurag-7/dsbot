@@ -452,7 +452,7 @@ class DateSolver(commands.Cog):
         embed.description = f"**Best {n}%** : {best_str}\n**Average** : {average_str}\n**Worst {n}%** : {worst_str}"
 
         fname = f"**Last {10 if len(logs) >= 10 else len(logs)} Entries:**"
-        fvalue = '\n'.join(f"{idx}." + "<@{0.user}> · {0.ap} AP · [Image]({0.image_url}) · {0.time_take:.2f}s\n".format(date)
+        fvalue = '\n'.join(f"{idx}." + "<@{0.user}> · {0.ap} AP · [Image]({0.image_url}) · {0.time_taken:.2f}s\n".format(date)
                            for idx, date in enumerate(recent, start=1))
 
         embed.add_field(name=fname, value=fvalue, inline=False)
