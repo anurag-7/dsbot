@@ -443,9 +443,9 @@ class DateSolver(commands.Cog):
         best = sum(l.time_taken for l in logs[:partial]) / partial
         average = sum(l.time_taken for l in logs) / len(logs)
 
-        worst_str = f"{int(worst * 100)}ms" if worst < 1 else f"{worst:.2f}s"
-        best_str = f"{int(best * 100)}ms" if best < 1 else f"{best:.2f}s"
-        average_str = f"{int(average * 100)}ms" if average < 1 else f"{average:.2f}s"
+        worst_str = f"{int(worst * 1000)}ms" if worst < 1 else f"{worst:.2f}s"
+        best_str = f"{int(best * 1000)}ms" if best < 1 else f"{best:.2f}s"
+        average_str = f"{int(average * 1000)}ms" if average < 1 else f"{average:.2f}s"
 
         embed = discord.Embed(color=0x000000)
         embed.title = "**__Performance Log__**"
