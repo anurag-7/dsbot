@@ -20,7 +20,7 @@ from tesserocr import OEM, PSM, PyTessBaseAPI
 from .ext.datesolver import game
 
 
-@dataclasses.dataclass(frozen=True, slots=True)
+@dataclasses.dataclass(frozen=True)
 class DateResult:
     ap: int
     user: int
