@@ -435,7 +435,7 @@ class DateSolver(commands.Cog):
 
 
         if n != 100:
-            partial = (len(self.perf_log) *  n/100)
+            partial: int = int(len(self.perf_log) *  n/100)
         else:
             partial = len(self.perf_log)
 
@@ -443,16 +443,16 @@ class DateSolver(commands.Cog):
         best = sum(l.time_taken for l in logs[:partial]) / partial
         average = sum(l.time_taken for l in logs) / len(logs)
 
-        worst_str = f"{worst * 100}ms" if worst < 1 else f"{worst:.2f}s"
-        best_str = f"{best * 100}ms" if best < 1 else f"{best:.2f}s"
-        average_str = f"{average * 100}ms" if average < 1 else f"{average:.2f}s"
+        worst_str = f"{int(worst * 100)}ms" if worst < 1 else f"{worst:.2f}s"
+        best_str = f"{int(best * 100)}ms" if best < 1 else f"{best:.2f}s"
+        average_str = f"{int(average * 100)}ms" if average < 1 else f"{average:.2f}s"
 
         embed = discord.Embed(color=0x000000)
-        embed.title = "**__Performance Logs__**"
+        embed.title = "**__Performance Log__**"
         embed.description = f"**Best {n}%** : {best_str}\n**Average** : {average_str}\n**Worst {n}%** : {worst_str}"
 
         fname = f"**Last {10 if len(logs) >= 10 else len(logs)} Entries:**"
-        fvalue = '\n'.join(f"{idx}." + "<@{0.user}> · {0.ap} AP · [Image]({0.image_url}) · {0.time_taken:.2f}s\n".format(date)
+        fvalue = '\n'.join(f"{idx}." + "<@{0.user}> · {0.ap} AP · [Image]({0.image_url}) · {0.time_taken:.3f}s\n".format(date)
                            for idx, date in enumerate(recent, start=1))
 
         embed.add_field(name=fname, value=fvalue, inline=False)
