@@ -52,12 +52,6 @@ class DateResult:
             return self.time_taken >= other.time_taken
         return False
 
-    def __add__(self, other) -> int:
-        if isinstance(other, self.__class__):
-            return self.time_taken + other.time_taken
-        elif isinstance(other, int):
-            return self.time_taken + other
-        raise ValueError(f"{other} must be of Typer <int> or <{self.__class__}>")
 
 default_maze = [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
                 [1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1],
@@ -445,9 +439,9 @@ class DateSolver(commands.Cog):
         else:
             partial = len(self.perf_log)
 
-        worst = sum(logs[-partial:]) / partial
-        best = sum(logs[:partial]) / partial
-        average = sum(logs) / len(logs)
+        worst = sum(l.time_taken for l in logs[-partial:]) / partial
+        best = sum(l.time_taken for l in logs[:partial]) / partial
+        average = sum(l.time_taken for l in logs) / len(logs)
 
         worst_str = f"{worst * 100}ms" if worst < 1 else f"{worst:.2f}s"
         best_str = f"{best * 100}ms" if best < 1 else f"{best:.2f}s"
