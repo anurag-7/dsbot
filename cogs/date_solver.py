@@ -339,7 +339,7 @@ class DateSolver(commands.Cog):
             else:
                 path = f"`{', '.join(translate[x] for x in solution if x != -1)}`"
             if is_airport:
-                await m.edit(content=f" `No Solution Found` | {path} -> Max {affection} moves.", embed=None)
+                await m.edit(content=f" `No Solution Found` | {path} -> `Max {affection} moves after Airport.`", embed=None)
 
             else:
                 await m.edit(content=f"`{affection} AP` | {path}", embed=None)
@@ -430,7 +430,7 @@ class DateSolver(commands.Cog):
             else:
                 path = f"`{', '.join(translate[x] for x in solution if x != -1)}`"
             if is_airport:
-                await m.edit(content=f" `No Solution Found` | {path} -> Max {affection} moves.", embed=None)
+                await m.edit(content=f" `No Solution Found` | {path} -> `Max {affection} moves after Airport.`", embed=None)
 
             else:
                 await m.edit(content=f"`{affection} AP` | {path}", embed=None)
