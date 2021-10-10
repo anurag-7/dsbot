@@ -72,7 +72,7 @@ default_maze = [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
 
 translate = {
     "tree": 0,
-    "airport": 0,
+
     "gas": 15,
 
     "taco": 25,
@@ -89,6 +89,7 @@ translate = {
     "shopping": 110,
     "ring": 115,
     "flower": 120,
+    "airport": 125,
 
     "up": 0,
     "down": 1,
@@ -110,6 +111,7 @@ translate = {
     110: "SHOPPING",
     115: "RING",
     120: "FLOWER",
+    125: "AIRPORT",
 
     0: "UP",
     1: "DOWN",
@@ -133,6 +135,7 @@ EMOJIS = {
     110: "🛍️",
     115: "💍",
     120: "🌼",
+    125: "✈️",
 
     0: "🔼",
     1: "🔽",
@@ -176,13 +179,15 @@ def GetCVImage(image, color='BGR'):
 class DateSolver(commands.Cog):
 
     def __init__(self, bot):
-        template_path = f"{bot.PATH}/templates"
+
         self.bot = bot
         self.API = PyTessBaseAPI(psm=PSM.SINGLE_BLOCK, oem=OEM.TESSERACT_ONLY)
-        self.perf_log = collections.deque([])
+        self.perf_log = collections.deque([], maxlen=1000)
+
         task = self.bot.loop.create_task(self.db_open())
         self.bot.loop.run_until_complete(task)
 
+        template_path = f"{bot.PATH}/templates"
         self.templates = {
             f.split('.')[0]: cv2.imread(f'{template_path}/{f}') for f in os.listdir(template_path)
         }
@@ -323,21 +328,22 @@ class DateSolver(commands.Cog):
         partial = functools.partial(self.game_setup, maze, base_ori, stats, total, ring)
         affection, solution = await self.bot.loop.run_in_executor(None, partial)
 
-        if affection != -1:
+        if ring and affection in (125, -1):
+            await m.edit(content="No Solution with Ring Found :(", embed=None)
+        elif affection != -1:
             cursor = await self.bot.DB.execute("SELECT emoji FROM users WHERE user_id = ?", (ctx.author.id,))
             val = await cursor.fetchone()
             if val and val[0]:
                 path = ' '.join(EMOJIS[x] for x in solution if x != -1)
             else:
                 path = f"`{', '.join(translate[x] for x in solution if x != -1)}`"
-
-            await m.edit(content=f"`{affection} AP` | {path}", embed=None)
+                if solution[-1] != 125:
+                    await m.edit(content=f"`{affection} AP` | {path}", embed=None)
+                else:
+                    await m.edit(content=f" `No Solution Found` | {path} -> Max {affection} moves.", embed=None)
             await cursor.close()
         else:
-            if ring:
-                await m.edit(content="No Solution with Ring Found :(", embed=None)
-            else:
-                await m.edit(content="No Solution Found, try going to the Airport and solving again.", embed=None)
+            await m.edit(content="No Solution Found :(", embed=None)
 
     @commands.command(name='emoji')
     async def _emoji(self, ctx):
@@ -405,25 +411,28 @@ class DateSolver(commands.Cog):
 
         stats, total = self.get_stats(image)
         partial = functools.partial(self.game_setup, maze, base_ori, stats, total, ring)
+
         start = time.time()
         affection, solution = await self.bot.loop.run_in_executor(None, partial)
-        result = DateResult(affection, ctx.author.id, time.time() - start, url) # type: ignore
+        result = DateResult(affection, ctx.author.id, time.time() - start, url)  # type: ignore
         self.perf_log.appendleft(result)
 
-        if affection != -1:
+        if ring and affection in (125, -1):
+            await m.edit(content="No Solution with Ring Found :(", embed=None)
+        elif affection != -1:
             cursor = await self.bot.DB.execute("SELECT emoji FROM users WHERE user_id = ?", (ctx.author.id,))
-            val = (await cursor.fetchone())
+            val = await cursor.fetchone()
             if val and val[0]:
                 path = ' '.join(EMOJIS[x] for x in solution if x != -1)
             else:
                 path = f"`{', '.join(translate[x] for x in solution if x != -1)}`"
-            await m.edit(content=f"`{affection} AP` | {path}", embed=None)
+                if solution[-1] != 125:
+                    await m.edit(content=f"`{affection} AP` | {path}", embed=None)
+                else:
+                    await m.edit(content=f" `No Solution Found` | {path} -> Max {affection} moves.", embed=None)
             await cursor.close()
         else:
-            if ring:
-                await m.edit(content="No Solution with Ring Found :(", embed=None)
-            else:
-                await m.edit(content="No Solution Found, try going to the Airport and solving again.", embed=None)
+            await m.edit(content="No Solution Found :(", embed=None)
 
     @_solve.error
     async def solve_error(self, ctx, error):
@@ -447,7 +456,7 @@ class DateSolver(commands.Cog):
         logs.sort()
 
         if n != 100:
-            partial: int = int(len(self.perf_log) *  n/100)
+            partial: int = int(len(self.perf_log) * (n / 100))
         else:
             partial = len(self.perf_log)
 
@@ -461,6 +470,7 @@ class DateSolver(commands.Cog):
                             f"**• Best {n}%** : {get_smallest_unit(best)}\n" \
                             f"**• Average** : {get_smallest_unit(average)}\n" \
                             f"**• Worst {n}%** : {get_smallest_unit(worst)}\n"
+
         embed.description += f"\n**• Last {10 if len(logs) >= 10 else len(logs)} Entries:**\n\n"
         embed.description += '\n'.join(f"{idx}.<@{d.user}> · {d.ap} AP · [Image]({d.image_url}) · {get_smallest_unit(d.time_taken)}\n"
                                        for idx, d in enumerate(recent, start=1))
