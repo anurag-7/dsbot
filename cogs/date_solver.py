@@ -328,7 +328,7 @@ class DateSolver(commands.Cog):
         partial = functools.partial(self.game_setup, maze, base_ori, stats, total, ring)
         affection, solution = await self.bot.loop.run_in_executor(None, partial)
 
-        if ring and affection in (125, -1):
+        if ring and (affection == -1 or solution[-1] == 125):
             await m.edit(content="No Solution with Ring Found :(", embed=None)
         elif affection != -1:
             cursor = await self.bot.DB.execute("SELECT emoji FROM users WHERE user_id = ?", (ctx.author.id,))
@@ -337,10 +337,10 @@ class DateSolver(commands.Cog):
                 path = ' '.join(EMOJIS[x] for x in solution if x != -1)
             else:
                 path = f"`{', '.join(translate[x] for x in solution if x != -1)}`"
-                if solution[-1] != 125:
-                    await m.edit(content=f"`{affection} AP` | {path}", embed=None)
-                else:
-                    await m.edit(content=f" `No Solution Found` | {path} -> Max {affection} moves.", embed=None)
+            if solution[-1] != 125:
+                await m.edit(content=f"`{affection} AP` | {path}", embed=None)
+            else:
+                await m.edit(content=f" `No Solution Found` | {path} -> Max {affection} moves.", embed=None)
             await cursor.close()
         else:
             await m.edit(content="No Solution Found :(", embed=None)
