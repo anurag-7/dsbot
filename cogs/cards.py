@@ -131,8 +131,7 @@ class CardDrops(commands.Cog):
         self.bot = bot
 
         if TESSEROCR_MODE:
-            self.ocr_api = tesserocr.PyTessBaseAPI(psm=tesserocr.PSM.SINGLE_BLOCK,
-                                                   oem=tesserocr.OEM.TESSERACT_ONLY)
+            self.ocr_api = tesserocr.PyTessBaseAPI()
         else:
             self.ocr_api = None
 
