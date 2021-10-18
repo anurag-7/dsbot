@@ -69,7 +69,7 @@ def get_cuts(image: np.ndarray, points: np.ndarray) -> np.ndarray:
     return result + background
 
 
-def segment_and_classify(image: np.ndarray) -> List[Tuple[np.ndarray, np.ndarray, int]]:
+def segment_and_classify(image: np.ndarray, min_ed: int) -> List[Tuple[np.ndarray, np.ndarray, int]]:
     y, x, *_ = image.shape
     amount = 3 if x < 850 else 4
 
@@ -82,14 +82,17 @@ def segment_and_classify(image: np.ndarray) -> List[Tuple[np.ndarray, np.ndarray
         min_x, max_x = np.min(xi), np.max(xi)
         min_y, max_y = np.min(yi), np.max(yi)
 
-        _, cut = cv2.threshold(img[min_y: max_y, min_x: max_x], 80, 255, cv2.THRESH_BINARY)
-
         if max_y > 395:
             ed = 3
         elif max_x > 263:
             ed = 2
         else:
             ed = 1
+
+        if ed < min_ed:
+            continue
+
+        _, cut = cv2.threshold(img[min_y: max_y, min_x: max_x], 80, 255, cv2.THRESH_BINARY)
 
         top, bottom = POINTS[ed]
         name = get_cuts(cut, top)
@@ -98,9 +101,9 @@ def segment_and_classify(image: np.ndarray) -> List[Tuple[np.ndarray, np.ndarray
 
     return cuts
 
-def get_drop_text(image: np.ndarray, api: Optional["tesserocr.PyTessBaseAPI"] = None) -> List[KarutaDrop]:
+def get_drop_text(image: np.ndarray, api: Optional["tesserocr.PyTessBaseAPI"] = None, min_ed: int = 0) -> List[KarutaDrop]:
 
-    cuts = segment_and_classify(image)
+    cuts = segment_and_classify(image, min_ed)
     card_drops = []
 
     if api is None:
@@ -113,10 +116,10 @@ def get_drop_text(image: np.ndarray, api: Optional["tesserocr.PyTessBaseAPI"] = 
     else:
         for name, series, ed in cuts:
             api.SetImageBytes(name.tobytes(), *get_cv_image(name))
-            t_name = api.GetUTF8Text().replace('\n', ' ')
+            t_name = api.GetUTF8Text().replace('\n', ' ').strip()
 
             api.SetImageBytes(series.tobytes(), *get_cv_image(series))
-            t_series = api.GetUTF8Text().replace('\n', ' ')
+            t_series = api.GetUTF8Text().replace('\n', ' ').strip()
 
             card_drops.append(KarutaDrop(t_name, t_series, ed))
 
@@ -146,16 +149,39 @@ class CardDrops(commands.Cog):
                 image = cv2.imdecode(buffer, cv2.IMREAD_UNCHANGED)
                 return image
 
+    @commands.Cog.listener()
+    async def on_message(self, message):
+        if (message.author.id == 646937666251915264
+                and message.guild.id == 563636165497061376
+                and message.attachments
+                and message.content.lower().endswith("cards!")):
+
+            url = message.attachments[0].url
+
+            image = await self.fetch_image(url)
+            partial = functools.partial(get_drop_text, image, self.ocr_api, 3)
+            cards = await self.bot.loop.run_in_executor(None, partial)
+
+            if cards:
+                to_send = '\n'.join(f"{c.name} · {c.series}" for c in cards)
+                await message.channel.send(f"<@&825126630467829861> | `{to_send}`")
+
     @commands.command(name='droptest')
-    async def _droptest(self, ctx, url: str):
+    async def _droptest(self, ctx, min_ed: int = 1, url: str = ""):
+        if not url:
+            return
+
         image = await self.fetch_image(url)
-        partial = functools.partial(get_drop_text, image, self.ocr_api)
+        partial = functools.partial(get_drop_text, image, self.ocr_api, min_ed)
         t = time.time()
         cards = await self.bot.loop.run_in_executor(None, partial)
 
-        to_send = '\n'.join(f"{c.name} | {c.series} | ED{c.ed}" for c in cards)
+        if not cards:
+            await ctx.send("Nothing to send")
+        else:
+            to_send = '\n'.join(f"{c.name} | {c.series} | ED{c.ed}" for c in cards)
+            await ctx.send(f"```ocaml\n{to_send}\n\n> Time Taken: {time.time() - t:.3f}s```")
 
-        await ctx.send(f"```ocaml\n{to_send}\n\n> Time Taken: {time.time() - t:.3f}s```")
 
 def setup(bot):
     bot.add_cog(CardDrops(bot))
