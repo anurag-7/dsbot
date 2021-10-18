@@ -5,7 +5,7 @@ import os
 import asyncio
 
 try:
-    import uvloop  # type: ignore
+    import uvloop
     asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
 except ModuleNotFoundError:
@@ -38,20 +38,17 @@ async def on_ready():
 async def on_message(message):
     if message.content.lower().startswith(">gojobhai"):
         embed = discord.Embed(color=0x36393f)
-        embed.set_image(
-            url="https://cdn.discordapp.com/attachments/313405009536614402/896864488135987230/gojo-satoru-2-7309.png"
-        )
+        embed.set_image(url="https://cdn.discordapp.com/attachments/313405009536614402/896864488135987230/gojo-satoru-2-7309.png")
         await message.channel.send(embed=embed)
 
     await bot.process_commands(message)
 
 cogs = (
     'jishaku',
-    'cogs.date_solver'
     'cogs.cards'
 )
 
 for cog in cogs:
     bot.load_extension(cog)
 
-bot.run("ODgzNjkxNDE3MDQwNDcwMDI3.YTNnxA.8Rvv1oPfU4_Cgq8Zq3VivhfI5wY")
+bot.run("NzMzNTQ1NTUwODI1MzkwMTUw.XxEthw.kSmZGtDXBuaQyykSVxlv-xyNuBI")
