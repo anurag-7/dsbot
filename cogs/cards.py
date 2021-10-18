@@ -150,7 +150,7 @@ class CardDrops(commands.Cog):
     @commands.command(name='droptest')
     async def _droptest(self, ctx, url: str):
         image = await self.fetch_image(url)
-        partial = functools.partial(get_drop_text, image)
+        partial = functools.partial(get_drop_text, image, self.ocr_api)
         t = time.time()
         cards = await self.bot.loop.run_in_executor(None, partial)
 
