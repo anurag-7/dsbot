@@ -84,7 +84,7 @@ def segment_and_classify(image: np.ndarray, min_ed: int) -> List[Tuple[np.ndarra
 
         if (max_y - min_y) > 370:
             ed = 3
-        elif (max_x - min_x) > 263:
+        elif (max_x - min_x) > 245:
             ed = 2
         else:
             ed = 1
