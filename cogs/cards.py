@@ -5,7 +5,6 @@ from typing import Dict, Generator, List, Optional, Tuple
 
 import aiohttp
 import cv2
-import discord
 import numpy as np
 from discord.ext import commands
 
@@ -101,7 +100,10 @@ def segment_and_classify(image: np.ndarray, min_ed: int) -> List[Tuple[np.ndarra
 
     return cuts
 
-def get_drop_text(image: np.ndarray, api: Optional["tesserocr.PyTessBaseAPI"] = None, min_ed: int = 0) -> List[KarutaDrop]:
+def get_drop_text(image: np.ndarray,
+                  api: Optional["tesserocr.PyTessBaseAPI"] = None,
+                  min_ed: int = 0
+                  ) -> List[KarutaDrop]:
 
     cuts = segment_and_classify(image, min_ed)
     card_drops = []

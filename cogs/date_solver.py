@@ -502,7 +502,7 @@ class DateSolver(commands.Cog):
         embed.add_field(name=r"\🔹 What works", value=content_a, inline=False)
         embed.add_field(name=r"\🔸 What doesn't work", value=content_b, inline=False)
         embed.add_field(name=r"\📙 Additionally", value=content_c, inline=False)
-        embed.set_footer(text="For bug reports, refer to: anu#1337")
+        embed.set_footer(text="For bug reports, refer to: anu#5238")
         await ctx.send(embed=embed)
 
 def setup(bot):
