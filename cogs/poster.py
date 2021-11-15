@@ -5,8 +5,13 @@ from dataclasses import dataclass
 import time
 import asyncio
 import contextlib
-import aiosqlite
-import os
+
+def is_owner_or_admin():
+    def predicate(ctx):
+        return (ctx.author.id == 215859564900253696
+                or ctx.author.guild_permissions.administrator)
+
+    return commands.check(predicate)
 
 @dataclass
 class ChannelCycle:
@@ -73,6 +78,7 @@ class Poster(commands.Cog):
                     channel.next_post += channel.cycle_time
 
     @commands.command("addchannel")
+    @is_owner_or_admin()
     async def _addchannel(self, ctx, channel: discord.TextChannel, webhook_url: str):
         await self.db.execute('''
                               INSERT INTO cycles (server_id, channel_id, cycle_time, webhook_url)
@@ -90,6 +96,7 @@ class Poster(commands.Cog):
         await ctx.send(f"Channel {channel.mention} added to be cycled.")
 
     @commands.command("removechannel")
+    @is_owner_or_admin()
     async def _removechannel(self, ctx, channel: discord.TextChannel):
         await self.db.execute('''
                                DELETE FROM cycles WHERE channel_id = ?
@@ -101,6 +108,7 @@ class Poster(commands.Cog):
         await ctx.send(f"Channel {channel.mention} successfully removed from mention.")
 
     @commands.command("removepost")
+    @is_owner_or_admin()
     async def _removepost(self, ctx, message_id):
         cur = await self.db.execute('''
                                     SELECT * FROM posts where posted_on = ?
@@ -124,6 +132,7 @@ class Poster(commands.Cog):
             await ctx.send("Successfully removed Channel Post")
 
     @commands.command("addpost")
+    @is_owner_or_admin()
     async def _addpost(self, ctx, channel: discord.TextChannel, *, post: str):
 
         await self.db.execute('''
@@ -138,6 +147,7 @@ class Poster(commands.Cog):
         await ctx.channel.send(f"Successfully created the Post for channel {channel.mention}")
 
     @commands.command("channeltime")
+    @is_owner_or_admin()
     async def _channeltime(self, ctx, channel: discord.TextChannel, minutes: float):
         if not 0.5 <= minutes <= 1440:
             await ctx.send("Timer can only be set between 0.5 and 1440 minutes")
