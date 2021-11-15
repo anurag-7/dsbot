@@ -48,7 +48,8 @@ async def on_message(message):
 cogs = (
     'jishaku',
     'cogs.date_solver',
-    'cogs.cards'
+    'cogs.cards',
+    'cogs.poster'
 )
 
 for cog in cogs:
