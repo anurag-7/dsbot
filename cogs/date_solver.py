@@ -226,6 +226,8 @@ class DateSolver(commands.Cog):
         for name, t in self.templates.items():
             res = cv2.matchTemplate(image, t, cv2.TM_CCORR_NORMED)
             if np.amax(res) >= 0.99:
+                if name.endswith("1"):
+                    name = name[:-1]
                 result = int(translate[name])
                 ring = True if result == 115 else ring
                 break
