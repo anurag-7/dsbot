@@ -39,7 +39,7 @@ async def on_message(message):
     if message.content.lower().startswith(">gojobhai"):
         embed = discord.Embed(color=0x36393f)
         embed.set_image(
-            url="https://cdn.discordapp.com/attachments/313405009536614402/896864488135987230/gojo-satoru-2-7309.png"
+            url="https://media.discordapp.net/attachments/936254125933469727/938342185575796776/gojo-satoru-2-7309.png"
         )
         await message.channel.send(embed=embed)
 
