@@ -247,7 +247,7 @@ class DateSolver(commands.Cog):
             [(228, 278), (298, 278), (378, 278), (453, 278), (528, 278)],
             [(199, 330), (285, 330), (371, 330), (457, 330), (543, 330)],
             [(180, 395), (275, 395), (370, 395), (460, 395), (560, 395)],
-            [(163, 475), (273, 475), (384, 480), (492, 475), (501, 475)],
+            [(163, 475), (273, 475), (384, 480), (492, 475), (605, 475)],
         ]
 
         y_checks = [
@@ -268,14 +268,12 @@ class DateSolver(commands.Cog):
         for i, k in zip(range(2, 13, 2), x_checks):
             for j, coords in zip(range(1, 10, 2), k):
                 b, g, r = image[coords[1], coords[0]]
-                total = sum((int(x) for x in (b,g,r)))
-                maze[i][j] = int(red[0] <= r <= red[1] and green[0] <= g <= green[1] and blue[0] <= b <= blue[1] and (669 < total or total < 660) )
+                maze[i][j] = int(red[0] <= r <= red[1] and green[0] <= g <= green[1] and blue[0] <= b <= blue[1])
 
         for i, k in zip(range(1, 15, 2), y_checks):
             for j, coords in zip(range(2, 11, 2), k):
                 b, g, r = image[coords[1], coords[0]]
-                total = sum((int(x) for x in (b,g,r)))
-                maze[i][j] = int(red[0] <= r <= red[1] and green[0] <= g <= green[1] and blue[0] <= b <= blue[1] and (669 < total or total < 660) )
+                maze[i][j] = int(red[0] <= r <= red[1] and green[0] <= g <= green[1] and blue[0] <= b <= blue[1])
 
         ring = False
         for i, (x, y, diff) in zip(range(1, 14, 2), source):
