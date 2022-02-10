@@ -48,11 +48,10 @@ async def on_message(message):
 cogs = (
     'jishaku',
     'cogs.date_solver',
-    'cogs.cards',
-    'cogs.poster'
+
 )
 
 for cog in cogs:
     bot.load_extension(cog)
 
-bot.run("ODgzNjkxNDE3MDQwNDcwMDI3.YTNnxA.8Rvv1oPfU4_Cgq8Zq3VivhfI5wY")
+bot.run("NzMzNTQ1NTUwODI1MzkwMTUw.XxEthw.kSmZGtDXBuaQyykSVxlv-xyNuBI")
