@@ -260,10 +260,9 @@ class DateSolver(commands.Cog):
             [(223, 520), (337, 520), (451, 520), (570, 520)]
         ]
 
-        red = (200, 235)
-        green = (190, 230)
-        blue = (160, 245)
-
+        red = (90, 95)
+        green = (91, 97)
+        blue = (91, 94)
 
         for i, k in zip(range(2, 13, 2), x_checks):
             for j, coords in zip(range(1, 10, 2), k):
@@ -282,7 +281,7 @@ class DateSolver(commands.Cog):
                 ring = True if r else ring
                 x += diff
 
-        ori = 2 if sum(image[576, 388]) == 619 else 3
+        ori = 2 if sum(image[577, 397]) == 450 else 3
         return maze, ori, ring
 
     async def fetch_image(self, url):
