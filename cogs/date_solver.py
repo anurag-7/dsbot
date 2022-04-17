@@ -281,7 +281,7 @@ class DateSolver(commands.Cog):
                 ring = True if r else ring
                 x += diff
 
-        ori = 2 if sum(image[577, 397]) == 450 else 3
+        ori = 2 if sum(image[584, 405]) == 320 else 3
         return maze, ori, ring
 
     async def fetch_image(self, url):
