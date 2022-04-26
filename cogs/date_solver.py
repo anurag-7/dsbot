@@ -260,20 +260,6 @@ class DateSolver(commands.Cog):
             [(220, 520), (337, 520), (451, 520), (568, 520)]
         ]
 
-        red = (90, 95)
-        green = (91, 97)
-        blue = (91, 94)
-
-        for i, k in zip(range(2, 13, 2), x_checks):
-            for j, coords in zip(range(1, 10, 2), k):
-                b, g, r = image[coords[1], coords[0]]
-                maze[i][j] = int(red[0] <= r <= red[1] and green[0] <= g <= green[1] and blue[0] <= b <= blue[1])
-
-        for i, k in zip(range(1, 15, 2), y_checks):
-            for j, coords in zip(range(2, 11, 2), k):
-                b, g, r = image[coords[1], coords[0]]
-                maze[i][j] = int(red[0] <= r <= red[1] and green[0] <= g <= green[1] and blue[0] <= b <= blue[1])
-
         ring = False
         for i, (x, y, diff) in zip(range(1, 14, 2), source):
             for j in range(1, 10, 2):
@@ -282,6 +268,19 @@ class DateSolver(commands.Cog):
                 x += diff
 
         ori = 2 if sum(image[584, 405]) == 320 else 3
+
+        thresh = 160
+
+        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+        im_bw = cv2.threshold(gray, thresh, 255, cv2.THRESH_BINARY)[1]
+
+        for i, k in zip(range(2, 13, 2), x_checks):
+            for j, coords in zip(range(1, 10, 2), k):
+                maze[i][j] = int(im_bw[coords[1], coords[0]]) == 0
+
+        for i, k in zip(range(1, 15, 2), y_checks):
+            for j, coords in zip(range(2, 11, 2), k):
+                maze[i][j] = int(im_bw[coords[1], coords[0]]) == 0
         return maze, ori, ring
 
     async def fetch_image(self, url):
