@@ -273,14 +273,18 @@ class DateSolver(commands.Cog):
 
         gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
         im_bw = cv2.threshold(gray, thresh, 255, cv2.THRESH_BINARY)[1]
+        kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3, 3))
+        closed = cv2.morphologyEx(im_bw, cv2.MORPH_CLOSE, kernel)
 
         for i, k in zip(range(2, 13, 2), x_checks):
             for j, coords in zip(range(1, 10, 2), k):
-                maze[i][j] = int(im_bw[coords[1], coords[0]]) == 0
+                maze[i][j] = int(closed[coords[1], coords[0]]) == 0
 
         for i, k in zip(range(1, 15, 2), y_checks):
             for j, coords in zip(range(2, 11, 2), k):
-                maze[i][j] = int(im_bw[coords[1], coords[0]]) == 0
+                print(int(im_bw[coords[1], coords[0]]) == 0)
+                maze[i][j] = int(closed[coords[1], coords[0]]) == 0
+
         return maze, ori, ring
 
     async def fetch_image(self, url):
