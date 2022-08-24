@@ -261,23 +261,26 @@ class DateSolver(commands.Cog):
         ]
 
         ring = False
+        kernel = np.ones((8, 8), np.uint8)
+        thresh = cv2.erode(image, kernel, cv2.BORDER_REFLECT)
+        _, thresh = cv2.threshold(image,100,180,cv2.THRESH_BINARY)
+
         for i, (x, y, diff) in zip(range(1, 14, 2), source):
             for j in range(1, 10, 2):
                 maze[i][j], r = self.match_template(image[y: y + 35, x: x + 35])  # type: ignore
                 ring = True if r else ring
                 x += diff
 
-        ori = 3 if 264 <= sum(image[577, 420]) <= 285 else 2
+        ori = 3 if sum(thresh[577, 420]) == 0 else 2
 
         for i, k in zip(range(2, 13, 2), x_checks):
             for j, coords in zip(range(1, 10, 2), k):
-                b, g, r = image[coords[1], coords[0]]
-                maze[i][j] = 85 <= b <= 95 and 85 <= g <= 95 and 85 <= r <= 95
+                maze[i][j] = sum(thresh[coords[1], coords[0]]) == 0
 
         for i, k in zip(range(1, 15, 2), y_checks):
             for j, coords in zip(range(2, 11, 2), k):
-                b, g, r = image[coords[1], coords[0]]
-                maze[i][j] = 85 <= b <= 95 and 85 <= g <= 95 and 85 <= r <= 95
+
+                maze[i][j] = sum(thresh[coords[1], coords[0]]) == 0
 
         return maze, ori, ring
 
