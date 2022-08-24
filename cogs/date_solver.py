@@ -267,17 +267,18 @@ class DateSolver(commands.Cog):
                 ring = True if r else ring
                 x += diff
 
-        ori = 2 if sum(image[578, 398]) == 619 else 3
+        ori = 3 if 264 <= sum(image[577, 420]) <= 285 else 2
 
         for i, k in zip(range(2, 13, 2), x_checks):
             for j, coords in zip(range(1, 10, 2), k):
                 b, g, r = image[coords[1], coords[0]]
-                maze[i][j] = 150 <= b <= 170 and 205 <= g <= 225 and 240 <= r <= 270
+                maze[i][j] = 85 <= b <= 95 and 85 <= g <= 95 and 85 <= r <= 95
 
         for i, k in zip(range(1, 15, 2), y_checks):
             for j, coords in zip(range(2, 11, 2), k):
                 b, g, r = image[coords[1], coords[0]]
-                maze[i][j] = 150 <= b <= 170 and 205 <= g <= 225 and 240 <= r <= 270
+                maze[i][j] = 85 <= b <= 95 and 85 <= g <= 95 and 85 <= r <= 95
+
         return maze, ori, ring
 
     async def fetch_image(self, url):
