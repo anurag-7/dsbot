@@ -240,7 +240,7 @@ class DateSolver(commands.Cog):
                   (237, 225, 72), (221, 276, 80),
                   (205, 335, 89), (180, 410, 101),
                   (147, 505, 117)]
-
+``
         x_checks = [
             [(290, 200), (350, 200), (415, 200), (450, 200), (512, 200)],
             [(272, 235), (315, 235), (380, 235), (450, 235), (520, 235)],
@@ -268,7 +268,7 @@ class DateSolver(commands.Cog):
                 ring = True if r else ring
                 x += diff
 
-        ori = 3 if sum(image[577, 420]) != 252 else 2
+        ori = 3 if sum(image[590, 380]) == 225 else 2
 
         for i, k in zip(range(2, 13, 2), x_checks):
             for j, coords in zip(range(1, 10, 2), k):
