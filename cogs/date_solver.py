@@ -273,7 +273,7 @@ class DateSolver(commands.Cog):
                 ring = True if r else ring
                 x += diff
 
-        ori = 3 if sum(image[590, 380]) == 225 else 2
+        ori = 2 if sum(image[590, 380]) == 198 else 3
 
         for i, k in zip(range(2, 13, 2), x_checks):
             for j, coords in zip(range(1, 10, 2), k):
