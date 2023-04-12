@@ -261,11 +261,11 @@ class DateSolver(commands.Cog):
         ]
 
         ring = False
-
-        kernel = np.ones((8, 8), np.uint8)
+        kernel = np.ones((3, 3), np.uint8)
         thresh = cv2.erode(image, kernel, cv2.BORDER_REFLECT)
 
-        _, thresh = cv2.threshold(image,150,180,cv2.THRESH_BINARY)
+        _, thresh = cv2.threshold(thresh,150,180,cv2.THRESH_BINARY)
+
 
         for i, (x, y, diff) in zip(range(1, 14, 2), source):
             for j in range(1, 10, 2):
@@ -273,19 +273,18 @@ class DateSolver(commands.Cog):
                 ring = True if r else ring
                 x += diff
 
-        ori = 3 if sum(image[571, 404]) == 619 else 2
+        ori = 3 if sum(image[590, 380]) == 225 else 2
 
         for i, k in zip(range(2, 13, 2), x_checks):
             for j, coords in zip(range(1, 10, 2), k):
-                maze[i][j] = sum(thresh[coords[1], coords[0]]) == 540
+                maze[i][j] = sum(thresh[coords[1], coords[0]]) == 0
 
         for i, k in zip(range(1, 15, 2), y_checks):
             for j, coords in zip(range(2, 11, 2), k):
 
-                maze[i][j] = sum(thresh[coords[1], coords[0]]) == 540
+                maze[i][j] = sum(thresh[coords[1], coords[0]]) == 0
 
         return maze, ori, ring
-
 
     async def fetch_image(self, url):
         async with aiohttp.ClientSession() as session:
